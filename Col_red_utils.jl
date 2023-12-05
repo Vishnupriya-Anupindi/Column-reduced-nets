@@ -10,12 +10,18 @@ end
 
 @test norm_coord([1 1 0 1],2) == 13/16
 
-#function compute_P_j(pts, A, w, b, m, st, τ)
-#    P_j = zeros(τ)
-#    for j in st:1
-#        P_j = 
-#    end
-#end
+function compute_P_j(pts, A, w, b, m, s, st, τ)
+    P_j = zeros(1,τ)
+    for j in st:-1:1
+        n_w = min((w[j+1]) , m) - w[j]
+        P_j = repeat(P_j,b^n_w) 
+        @show(size(P_j))
+        @show n_w
+    end
+    return P_j
+end
+
+compute_P_j(0,0,[2,2,3,4],2,5,4,3,5)
 
 
 # pts needs to be of size (s, N) where N is length(badic) = b^m
