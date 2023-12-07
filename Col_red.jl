@@ -171,11 +171,7 @@ begin
 
 
 
-    if s == 2
-        include("NNLD_plots.jl")
-
-        plot_points(pts)
-    end
+    
 end
 
 #idxs = values(df_result[1762,:]) 
