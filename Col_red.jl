@@ -1,10 +1,7 @@
 include("Col_red_utils.jl")
+include("row_latt_red.jl")
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
-
-
-
-
 
 τ = 20
 
@@ -14,7 +11,7 @@ P = (C = ( [1 0; 0 1], [0 1; 1 0] ),
 
 begin
     s = 5000
-    m = 15
+    m = 12
     C = Matrix{Int64}[]
     for i in 1:s
         C_i = rand(0:1,m,m)
@@ -25,7 +22,7 @@ begin
     w_s = @. min(floor(Int64,log2(1:s)),m)
     st = findlast(w_s.< m)
 end
-@profview compute_P_j(P, A, w_s, st, τ)
+# @profview compute_P_j(P, A, w_s, st, τ)
 
 begin 
     s_val = collect(1:200:1500)
@@ -55,8 +52,10 @@ end
 
 begin
     fig = Figure()
-    ax = Axis(fig[1,1])
+    ax = Axis(fig[1,1], title = "comparision_plot", xlabel = "s", ylabel = "t")
     lines!(s_val,T_val)
     lines!(s_val,T_val2,linestyle = :dash)
+    lines!(s_val,T_val3,linestyle = :dot)
+    save("plot_comparision_v2.png", fig)
     fig
 end
