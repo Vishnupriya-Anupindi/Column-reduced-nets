@@ -75,8 +75,7 @@ end
     w = [0,1]
     st = 2
     τ = 3
-    prod_alg = compute_P_j(P, A, w, st, τ)
-    
+    @time prod_alg = compute_P_j(P, A, w, st, τ)
     CT = red_mat(P.C,w)
     PT = (;P...,C = CT)
     X = stack(get_points(PT))'
@@ -94,6 +93,10 @@ end
     @test pts == [[0.0, 0.0], [0.5, 0.25],[0.25; 0.5], [0.75, 0.75]]
     
 end
+
+
+
+
 
 
 
