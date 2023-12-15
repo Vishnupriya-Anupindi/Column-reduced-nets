@@ -44,7 +44,6 @@ function compute_P_j(P, A, w, st, τ)
     return P_j
 end
 
-
 # pts needs to be of size (s, N) where N is length(badic) = b^m
 function get_points!(pts, P) 
     (;C,b,m,s) = P  
@@ -103,3 +102,27 @@ end
    # m = 3
    # s = 2
     
+
+#################################################################################
+
+b = 2; m = 10; s = 10; z = [1 396 360 48 272 288 32 192 64 448]';
+w = @. min(floor(2*log2(1:s)), m); A = rand(s,6);
+
+     
+
+P = reduced_mv_product_qmc(b, m, z, w, A);
+
+function reduced_mv_product_qmc(b, m, z, w, A)
+    N = b^m;         #total number of cubature points N
+    M = @. b^(m-w);    #number of reduced points per dimension
+    s = length(z);   #number of dimensions s
+    push!(w,m) # extend reduction indices artificially to compute differences
+
+    P = zeros(1, size(A,2));
+    for j = s:-1:1
+         Xj = @. mod((0:M[j]-1)*z[j], N)/N;
+         #@show size(Xj') size(A[j:j,:])
+         P = repeat(P, Int64(b^(w[j+1]-w[j]))) + Xj * A[j:j,:];
+    end
+    return P
+end
