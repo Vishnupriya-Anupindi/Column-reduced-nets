@@ -1,5 +1,8 @@
 using LinearAlgebra
 using Test
+using BenchmarkTools
+using Statistics
+using CairoMakie
 
 @inline function norm_coord(v, b, bf = float(b))
     v_1 = 0.0
@@ -68,6 +71,13 @@ function get_points(P)
     return pts
 end
 
+function mat_mul_Pj(P, A, w)
+    CT = red_mat(P.C,w)
+    PT = (;P...,C = CT)
+    X = stack(get_points(PT))'
+    return X*A
+end
+
 @testset "column reduced computation" begin 
     P = (C = ( [1 0; 0 1], [0 1; 1 0] ),
         b = 2, m = 2,s = 2)
@@ -107,13 +117,6 @@ end
     
 
 #################################################################################
-
-b = 2; m = 10; s = 10; z = [1 396 360 48 272 288 32 192 64 448]';
-w = @. min(floor(2*log2(1:s)), m); A = rand(s,6);
-
-     
-
-P = reduced_mv_product_qmc(b, m, z, w, A);
 
 function reduced_mv_product_qmc(b, m, z, w, A)
     N = b^m;         #total number of cubature points N
