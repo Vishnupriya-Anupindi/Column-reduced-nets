@@ -3,6 +3,7 @@ using Test
 using BenchmarkTools
 using Statistics
 using CairoMakie
+using GLM, StatsBase, DataFrames
 
 @inline function norm_coord(v, b, bf = float(b))
     v_1 = 0.0
