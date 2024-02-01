@@ -133,3 +133,52 @@ function reduced_mv_product_qmc(b, m, z, w, A)
     end
     return P
 end
+
+
+#################################################################################
+
+function row_red_mat(C,w)
+    CT = deepcopy(C)
+    for i in eachindex(w)
+        for j in 1:w[i]
+            CT[i][end-j+1,:] .= 0  
+        end  
+    end
+    return CT
+end
+
+
+function row_red_prod(P, A, w, st, τ, pts)
+    (;C,b,m,s) = P
+    P_j = zeros(b^m,τ)
+    c = [zeros(1,τ) for i in 1:b^(m- minimum(w))]
+    #c = Vector{Matrix{Float64}}(undef,b^(m- minimum(w))) 
+    for j in st:-1:1
+        #Computing row vectors
+        for k in 0:b^(m-w[j])-1
+            c[k+1] = k/(b^(m-w[j])).*A[j:j,:] # Julia has a problem with index
+        end
+        #Compute P_j
+        for i in 1:b^m
+            k_i = floor(Int,pts[i][j]*b^(m-w[j]))
+            P_j[i:i,:] = P_j[i:i,:] + c[k_i + 1]
+        end
+    end
+    return P_j
+end
+
+@testset "row reduced computation" begin 
+    P = (C = ( [1 0; 0 1], [0 1; 1 0] ),
+        b = 2, m = 2,s = 2)
+    pts = get_points(P)
+    A = [1 2 3; 2 5 1]
+    w = [0,1]
+    st = 2
+    τ = 3
+    @time prod_alg = row_red_prod(P, A, w, st, τ, pts)
+    CT = row_red_mat(P.C,w)
+    PT = (;P...,C = CT)
+    X = stack(get_points(PT))'
+
+    @test prod_alg == X*A
+end

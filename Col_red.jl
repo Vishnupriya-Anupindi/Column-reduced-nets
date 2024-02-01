@@ -28,6 +28,8 @@ begin
     s_val = collect(1:200:1500)
     T_val = Float64[]
     T_val2 = Float64[]
+    T_val_r = Float64[]
+    T_val_gp = Float64[]
     (;m) = P
     for s in s_val
 
@@ -47,8 +49,18 @@ begin
 
         T_2 = @belapsed mat_mul_Pj($Ps, $A_s, $w_s)
         push!(T_val2,T_2)
+
+        pts = get_points(Ps)
+        T_gp = @belapsed get_points($Ps)
+        T_r = @belapsed row_red_prod($Ps, $A_s, $w_s, $st, $τ, $pts)
+        push!(T_val_gp, T_gp)
+        push!(T_val_r, T_r)
+        println("Finished s=", s)
     end
 end
+
+df = DataFrame(s = s_val, row_red = T_val_r, col_red = T_val, std_mat = T_val2 )
+
 
 function runtime_theory(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
     st = findlast(w_s.< m)
@@ -84,6 +96,10 @@ begin
     lines!(s_val,T_val2,linestyle = :solid, label="std_mul",linewidth = 2)
     c_3,c_4 = regres_comp(s_val,T_val2)
     lines!(s_val,c_3.*(s_val.^c_4), color = "light gray", linestyle = :dot)
+
+    lines!(s_val,T_val_r, label="row_red", linewidth = 2)
+    c_7,c_8 = regres_comp(s_val,T_val_r)
+    lines!(s_val,c_7.*(s_val.^c_8), color = "light gray", linestyle = :dot)
 
     lines!(s_val,T_val3,linestyle = :solid, label="row_latt_red",linewidth = 2)
     c_5,c_6 = regres_comp(s_val,T_val3)
