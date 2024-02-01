@@ -3,7 +3,7 @@ using Test
 using BenchmarkTools
 using Statistics
 using CairoMakie
-using GLM, StatsBase, DataFrames
+using GLM, StatsBase, DataFrames, CSV
 
 @inline function norm_coord(v, b, bf = float(b))
     v_1 = 0.0
@@ -135,7 +135,7 @@ function reduced_mv_product_qmc(b, m, z, w, A)
 end
 
 
-#################################################################################
+####################################  ROW REDUCED MATRIX PRODUCT #############################################
 
 function row_red_mat(C,w)
     CT = deepcopy(C)

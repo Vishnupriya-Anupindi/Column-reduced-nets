@@ -60,7 +60,7 @@ begin
 end
 
 df = DataFrame(s = s_val, row_red = T_val_r, col_red = T_val, std_mat = T_val2 )
-
+CSV.write("runtime_b$(b)_m$(m)_s$(s).csv ", df)
 
 function runtime_theory(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
     st = findlast(w_s.< m)
@@ -123,6 +123,10 @@ begin
     lines!(s_val,T_val2,linestyle = :solid, label="std_mul",linewidth = 2)
     c_3,c_4 = regres_comp(s_val,T_val2)
     lines!(s_val,c_3.*(s_val.^c_4), color = "light gray", linestyle = :dot)
+
+    lines!(s_val,T_val_r, label="row_red", linewidth = 2)
+    c_7,c_8 = regres_comp(s_val,T_val_r)
+    lines!(s_val,c_7.*(s_val.^c_8), color = "light gray", linestyle = :dot)
 
     lines!(s_val,T_val3,linestyle = :solid, label="row_latt_red",linewidth = 2)
     c_5,c_6 = regres_comp(s_val,T_val3)
