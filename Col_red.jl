@@ -10,7 +10,7 @@ P = (C = ( [1 0; 0 1], [0 1; 1 0] ),
 
 
 begin
-    s = 5000
+    s = 2000
     m = 12
     C = Matrix{Int64}[]
     for i in 1:s
@@ -50,6 +50,10 @@ begin
         T_2 = @belapsed mat_mul_Pj($Ps, $A_s, $w_s)
         push!(T_val2,T_2)
 
+        local z_r = rand(1:1000,s);
+        T_3 = @belapsed reduced_mv_product_qmc($b, $m, $z_r, $w_s, $A_s);
+        push!(T_val3,T_3)
+
         pts = get_points(Ps)
         T_gp = @belapsed get_points($Ps)
         T_r = @belapsed row_red_prod($Ps, $A_s, $w_s, $st, $τ, $pts)
@@ -59,7 +63,7 @@ begin
     end
 end
 
-df = DataFrame(s = s_val, row_red = T_val_r, col_red = T_val, std_mat = T_val2 )
+df = DataFrame(s = s_val, row_red = T_val_r, col_red = T_val, std_mat = T_val2, lat_red_row = T_val3 )
 CSV.write("runtime_b$(b)_m$(m)_s$(s).csv", df)
 
 function runtime_theory(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
@@ -101,9 +105,9 @@ begin
     c_7,c_8 = regres_comp(s_val,T_val_r)
     lines!(s_val,c_7.*(s_val.^c_8), color = "light gray", linestyle = :dot)
 
-    lines!(s_val,T_val3,linestyle = :solid, label="row_latt_red",linewidth = 2)
-    c_5,c_6 = regres_comp(s_val,T_val3)
-    lines!(s_val,c_5.*(s_val.^c_6), color = "light gray", linestyle = :dot)
+    #lines!(s_val,T_val3,linestyle = :solid, label="row_latt_red",linewidth = 2)
+    #c_5,c_6 = regres_comp(s_val,T_val3)
+    #lines!(s_val,c_5.*(s_val.^c_6), color = "light gray", linestyle = :dot)
 
     d_1,d_2 =  regres_theory(T_val, T_theory)
     lines!(s_val, d_2.*T_theory,linestyle = :dash, label="theoretical",linewidth = 2)

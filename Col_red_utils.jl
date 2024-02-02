@@ -153,15 +153,15 @@ function row_red_prod(P, A, w, st, τ, pts)
     P_j = zeros(b^m,τ)
     c = [zeros(1,τ) for i in 1:b^(m- minimum(w))]
     #c = Vector{Matrix{Float64}}(undef,b^(m- minimum(w))) 
-    for j in st:-1:1
+    @inbounds for j in st:-1:1
         #Computing row vectors
         for k in 0:b^(m-w[j])-1
-            c[k+1] = k/(b^(m-w[j])).*A[j:j,:] # Julia has a problem with index
+           @views @. c[k+1] = k/(b^(m-w[j]))*A[j:j,:] # Julia has a problem with index
         end
         #Compute P_j
         for i in 1:b^m
             k_i = floor(Int,pts[i][j]*b^(m-w[j]))
-            P_j[i:i,:] = P_j[i:i,:] + c[k_i + 1]
+            @views @. P_j[i:i,:] = P_j[i:i,:] + c[k_i + 1]
         end
     end
     return P_j
@@ -182,3 +182,27 @@ end
 
     @test prod_alg == X*A
 end
+
+# begin
+#     P = (C = ( [1 0; 0 1], [0 1; 1 0] ),
+#         b = 2, m = 12,s = 2)
+#     τ = 20
+#     s = 2000
+#     m = 12
+#     C = Matrix{Int64}[]
+#     for i in 1:s
+#         C_i = rand(0:1,m,m)
+#         push!(C,C_i)
+#     end
+#     P = (;P...,C,s,m)
+#     A = rand(s,τ) 
+#     w = @. min(floor(Int64,log2(1:s)),m)
+#     st = findlast(w.< m)
+#     pts = get_points(P)
+#     pts = SizedVector{s}.(pts)
+#     @time prod_alg = row_red_prod(P, A, w, st, τ, pts);
+#     @profview prod_alg = row_red_prod(P, A, w, st, τ, pts)
+#     #CT = row_red_mat(P.C,w)
+#     #PT = (;P...,C = CT)
+#     #X = stack(get_points(PT))'
+# end
