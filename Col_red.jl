@@ -60,7 +60,7 @@ begin
 end
 
 df = DataFrame(s = s_val, row_red = T_val_r, col_red = T_val, std_mat = T_val2 )
-CSV.write("runtime_b$(b)_m$(m)_s$(s).csv ", df)
+CSV.write("runtime_b$(b)_m$(m)_s$(s).csv", df)
 
 function runtime_theory(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
     st = findlast(w_s.< m)
