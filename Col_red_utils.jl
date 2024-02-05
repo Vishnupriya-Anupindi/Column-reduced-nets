@@ -30,18 +30,20 @@ end
 function compute_P_j(P, A, w, st, τ)
 (;C,b,m,s) = P
     P_j = zeros(1,τ)
+    Cn = zeros(Int64, m)
+    #X_j = Float64[]; sizehint!(X_j,b^(m - minimum(w))) #zeros(Float64,b^(m - minimum(w))) this gave error
     for j in st:-1:1
         # computing X_j
         X_j = zeros(Float64,b^(m-w[j])) # Array{Float64}(undef,b^(m-w[j]))
         for i in 1:b^(m-w[j])
-            Cn = (C[j]*(digits(i-1, base=b, pad=m))) .% b
+            Cn .= (C[j]*(digits(i-1, base=b, pad=m))) .% b  # Can improve this
             X_j[i] = norm_coord(Cn,b)
         end
-        q_j = X_j*A[j:j,:]
+        @views q_j = X_j*A[j:j,:]
 
         # computing P_j
         n_w = min( get(w,j+1,m) , m) - w[j]
-        P_j = repeat(P_j,b^n_w) + q_j
+        P_j = repeat(P_j,b^n_w) + q_j      #Can improve this
         # @show size(P_j) n_w q_j
         
     end
@@ -205,4 +207,28 @@ end
 #     #CT = row_red_mat(P.C,w)
 #     #PT = (;P...,C = CT)
 #     #X = stack(get_points(PT))'
+# end
+
+# begin 
+#     P = (C = ( [1 0; 0 1], [0 1; 1 0] ),
+#         b = 2, m = 2,s = 2)
+#     τ = 20
+#     s = 2000
+#     m = 12
+#     C = Matrix{Int64}[]
+#     for i in 1:s
+#         C_i = rand(0:1,m,m)
+#         push!(C,C_i)
+#     end
+#     P = (;P...,C,s,m)
+#     A = rand(s,τ) 
+#     w = @. min(floor(Int64,log2(1:s)),m)
+#     st = findlast(w.< m)
+#     @time prod_alg = compute_P_j(P, A, w, st, τ)
+#     @profview prod_alg = compute_P_j(P, A, w, st, τ)
+#     CT = red_mat(P.C,w)
+#     PT = (;P...,C = CT)
+#     X = stack(get_points(PT))'
+
+#     @test prod_alg ≈ X*A
 # end

@@ -1,5 +1,5 @@
 include("Col_red_utils.jl")
-include("row_latt_red.jl")
+#include("row_latt_red.jl") #already included
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
 
@@ -30,6 +30,7 @@ begin
     T_val2 = Float64[]
     T_val_r = Float64[]
     T_val_gp = Float64[]
+    T_val3 = Float64[]
     (;m) = P
     for s in s_val
 
@@ -51,7 +52,7 @@ begin
         push!(T_val2,T_2)
 
         local z_r = rand(1:1000,s);
-        T_3 = @belapsed reduced_mv_product_qmc($b, $m, $z_r, $w_s, $A_s);
+        T_3 = @belapsed reduced_mv_product_qmc($P.b, $m, $z_r, $w_s, $A_s);
         push!(T_val3,T_3)
 
         pts = get_points(Ps)
@@ -64,7 +65,7 @@ begin
 end
 
 df = DataFrame(s = s_val, row_red = T_val_r, col_red = T_val, std_mat = T_val2, lat_red_row = T_val3 )
-CSV.write("runtime_b$(b)_m$(m)_s$(s).csv", df)
+CSV.write("runtime_b$(P.b)_m$(m)_s$(s).csv", df)
 
 function runtime_theory(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
     st = findlast(w_s.< m)
@@ -105,9 +106,9 @@ begin
     c_7,c_8 = regres_comp(s_val,T_val_r)
     lines!(s_val,c_7.*(s_val.^c_8), color = "light gray", linestyle = :dot)
 
-    #lines!(s_val,T_val3,linestyle = :solid, label="row_latt_red",linewidth = 2)
-    #c_5,c_6 = regres_comp(s_val,T_val3)
-    #lines!(s_val,c_5.*(s_val.^c_6), color = "light gray", linestyle = :dot)
+    lines!(s_val,T_val3,linestyle = :solid, label="row_latt_red",linewidth = 2)
+    c_5,c_6 = regres_comp(s_val,T_val3)
+    lines!(s_val,c_5.*(s_val.^c_6), color = "light gray", linestyle = :dot)
 
     d_1,d_2 =  regres_theory(T_val, T_theory)
     lines!(s_val, d_2.*T_theory,linestyle = :dash, label="theoretical",linewidth = 2)
