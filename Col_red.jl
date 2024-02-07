@@ -2,14 +2,15 @@ include("Col_red_utils.jl")
 include("load_seq_mat.jl")
 #include("row_latt_red.jl") #already included
 
-mkpath("Output")
+#mkpath("Output")
 case = 2 # 1 means plot with random matrices, 2 means plot with sobol and niederreiter
-s_range = 20
-step_size = 1
+s_range = 400
+step_size = 40
 m = 12
 fn_postfix = "case$(case)_m$(m)_s$(s_range)"
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
+BenchmarkTools.DEFAULT_PARAMETERS.samples = 2
 
 τ = 20
 
@@ -44,6 +45,9 @@ begin
 
     T_val_sobol = Float64[]
     T_val2_sobol = Float64[]
+
+    T_val_nied = Float64[]
+    T_val2_nied = Float64[]
 
     (;m) = P
     for s in s_val
@@ -90,6 +94,17 @@ begin
             T_2_sobol = @belapsed mat_mul_Pj($Ps_sobol, $A_s, $w_s)
             push!(T_val2_sobol,T_2_sobol)
 
+            C_nied = load_seq_mat("Data/niederreiter_Cs.txt",P.b,m,s)
+            Ps_nied = (;Ps...,C=C_nied,s)
+            T_nied = @belapsed compute_P_j($Ps_nied, $A_s, $w_s, $st, $τ)
+            push!(T_val_nied,T_nied)
+            @show s w_s
+            #@show Ps_sobol.C
+            #@show s
+
+            T_2_nied = @belapsed mat_mul_Pj($Ps_nied, $A_s, $w_s)
+            push!(T_val2_nied,T_2_nied)
+
         end
 
 
@@ -97,6 +112,21 @@ begin
 
     end
 end
+
+# begin
+#     s = 1
+#     Ps = (;P...,s)
+#     A_s = rand(s,τ) 
+#     w_s = @. min(floor(Int64,log2(1:s)),m)
+#     st = findlast(w_s.< m)
+#     C_sobol = load_seq_mat("Data/sobol_Cs.txt",P.b,m,s)
+#     Ps_sobol = (;Ps...,C=C_sobol,s)
+#     #T_sobol_test = @belapsed compute_P_j($Ps_sobol, $A_s, $w_s, $st, $τ)
+#     T_2_sobol_test = @belapsed mat_mul_Pj($Ps_sobol, $A_s, $w_s)
+
+# end
+
+
 
 df = DataFrame(s = s_val, row_red = T_val_r, col_red = T_val, std_mat = T_val2, lat_red_row = T_val3 )
 CSV.write("runtime_b$(P.b)_m$(m)_s$(s_range).csv", df)
@@ -137,15 +167,18 @@ begin
     
     plot_lines!(s_val,T_val,"col_red")
     plot_lines!(s_val,T_val2,"std_mul")
-    plot_lines!(s_val,T_val_r,"row_red")
-    plot_lines!(s_val,T_val3,"row_latt_red")
+    #plot_lines!(s_val,T_val_r,"row_red")
+    #plot_lines!(s_val,T_val3,"row_latt_red")
 
-    d_1,d_2 =  regres_theory(T_val, T_theory)
-    lines!(s_val, d_2.*T_theory,linestyle = :dash, label="theoretical",linewidth = 2)
+    #d_1,d_2 =  regres_theory(T_val, T_theory)
+    #lines!(s_val, d_2.*T_theory,linestyle = :dash, label="theoretical",linewidth = 2)
     
     if case ==2
         plot_lines!(s_val,T_val_sobol,"Sobol_col_red")
         plot_lines!(s_val,T_val2_sobol,"Sobol_std_mul")
+
+        plot_lines!(s_val,T_val_nied,"Nied_col_red")
+        plot_lines!(s_val,T_val2_nied,"Nied_std_mul")
     end
 
     Legend(fig[1,2], ax)

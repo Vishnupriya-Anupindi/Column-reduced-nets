@@ -125,13 +125,13 @@ function reduced_mv_product_qmc(b, m, z, w, A)
     N = b^m;         #total number of cubature points N
     M = @. b^(m-w);    #number of reduced points per dimension
     s = length(z);   #number of dimensions s
-    push!(w,m) # extend reduction indices artificially to compute differences
+    #push!(w,m) # extend reduction indices artificially to compute differences
 
     P = zeros(1, size(A,2));
     for j = s:-1:1
          Xj = @. mod((0:M[j]-1)*z[j], N)/N;
          #@show size(Xj') size(A[j:j,:])
-         P = repeat(P, Int64(b^(w[j+1]-w[j]))) + Xj * A[j:j,:];
+         P = repeat(P, Int64(b^(get(w,j+1,m)-w[j]))) + Xj * A[j:j,:];
     end
     return P
 end
