@@ -117,6 +117,34 @@ end
    # b = 3
    # m = 3
    # s = 2
+
+
+function runtime_theory(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
+    st = findlast(w_s.< m)
+    run_theory = 0.0
+    for j in 1:st
+        run_theory += τ*b^(m-w_s[j])
+    end
+    return run_theory
+end 
+
+function regres_comp(s_val,T_val)
+    df = DataFrame(x = log.(s_val),y = log.(T_val))
+    ols = lm(@formula(y ~ x), df)
+    return exp(coef(ols)[1]), coef(ols)[2]
+end
+
+function regres_theory(T_val, T_theory)
+    df = DataFrame(x = T_val,y = T_theory)
+    ols = lm(@formula(x ~ y), df)
+    return coef(ols)[1], coef(ols)[2]
+end
+
+function plot_lines!(s_val,T_val,label)
+    lines!(s_val,T_val; linestyle = :solid, label , linewidth = 2)
+    c_1,c_2 = regres_comp(s_val,T_val)
+    lines!(s_val,c_1.*(s_val.^c_2), color = "light gray", linestyle = :dot)
+end
     
 
 #################################################################################
@@ -231,4 +259,33 @@ end
 #     X = stack(get_points(PT))'
 
 #     @test prod_alg ≈ X*A
+# end
+
+
+# begin
+#     s = 2000
+#     m = 12
+#     C = Matrix{Int64}[]
+#     for i in 1:s
+#         C_i = rand(0:1,m,m)
+#         push!(C,C_i)
+#     end
+#     P = (;P...,C,s,m)
+#     A = rand(s,τ) 
+#     w_s = @. min(floor(Int64,log2(1:s)),m)
+#     st = findlast(w_s.< m)
+# end
+# @profview compute_P_j(P, A, w_s, st, τ)
+
+# begin
+#     s = 1
+#     Ps = (;P...,s)
+#     A_s = rand(s,τ) 
+#     w_s = @. min(floor(Int64,log2(1:s)),m)
+#     st = findlast(w_s.< m)
+#     C_sobol = load_seq_mat("Data/sobol_Cs.txt",P.b,m,s)
+#     Ps_sobol = (;Ps...,C=C_sobol,s)
+#     #T_sobol_test = @belapsed compute_P_j($Ps_sobol, $A_s, $w_s, $st, $τ)
+#     T_2_sobol_test = @belapsed mat_mul_Pj($Ps_sobol, $A_s, $w_s)
+
 # end
