@@ -6,7 +6,7 @@ include("Col_red_utils.jl")
 case = 21   # 1 means plot with random matrices, 2 means plot with sobol and niederreiter
 s = 800
 step_size = 2
-m_range = 10
+m_range = 20
 fn_postfix = "case$(case)_m$(m_range)_s$(s)"
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
@@ -18,7 +18,7 @@ P = (C = ( [1 0; 0 1], [0 1; 1 0] ),
         b = 2, m=2, s)
 
 begin 
-    m_val = collect(1:step_size:m_range)
+    m_val = collect(10:step_size:m_range)
     T_val = Float64[]
     T_val2 = Float64[]
     T_val_r = Float64[]
@@ -106,7 +106,7 @@ CSV.write("runtime_$(fn_postfix)_b$(P.b).csv", df)
 
 begin
     fig = Figure()
-    ax = Axis(fig[1,1], title = "log_plot", xlabel = "log s", ylabel = "Runtime (log seconds)",xscale = log10, yscale = log10)
+    ax = Axis(fig[1,1], title = "log_plot", xlabel = "log m", ylabel = "Runtime (log seconds)",xscale = log10, yscale = log10)
     
     plot_lines!(m_val,T_val,"col_red")
     plot_lines!(m_val,T_val2,"std_mul")
@@ -132,7 +132,7 @@ end
 
 begin
     fig = Figure()
-    ax = Axis(fig[1,1], title = "plot", xlabel = "s", ylabel = "Runtime (seconds)")
+    ax = Axis(fig[1,1], title = "plot", xlabel = "m", ylabel = "Runtime (log seconds)", yscale = log10)
 
     plot_lines!(m_val,T_val,"col_red")
     plot_lines!(m_val,T_val2,"std_mul")
