@@ -63,7 +63,7 @@ end
 
 begin
     fig = Figure()
-    ax = Axis(fig[1,1], title = "plot", xlabel = "m", ylabel = "Runtime (log seconds)" , yscale = log10, yminorticksvisible = true, yminorgridvisible = true,
+    ax = Axis(fig[1,1], title = "", xlabel = "m", ylabel = "Runtime (log seconds)" , yscale = log10, yminorticksvisible = true, yminorgridvisible = true,
     yminorticks = IntervalsBetween(5))
 
 
