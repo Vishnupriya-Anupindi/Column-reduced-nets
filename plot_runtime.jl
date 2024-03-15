@@ -3,12 +3,11 @@ using Statistics
 using CairoMakie
 using GLM, StatsBase, DataFrames, CSV
 
-b = 2
-case = 12   # 1 means plot with random matrices, 2 means plot with sobol and niederreiter
-s_range = 1600
-step_size = 200
-m = 12
-fn_postfix = "case$(case)_m$(m)_s$(s_range)"
+case = 21   # 1 means plot with random matrices, 2 means plot with sobol and niederreiter
+s = 800
+step_size = 2
+m_range = 20
+fn_postfix = "case$(case)_m$(m_range)_s$(s)"
 
 #df = DataFrame(s = df.s, row_red = df.row_red, col_red = df.col_red, std_mat = df.std_mat, lat_red_row = df.lat_red_row, theo_col = df.theo_col)
 df = CSV.read("runtime_$(fn_postfix)_b$(b).csv", DataFrame)
@@ -36,24 +35,24 @@ end
 
 begin
     fig = Figure()
-    ax = Axis(fig[1,1], title = "", xlabel = "log s", ylabel = "Runtime (log seconds)",xscale = log10, yscale = log10, xminorticksvisible = true, xminorgridvisible = true,
+    ax = Axis(fig[1,1], title = "", xlabel = "log m", ylabel = "Runtime (log seconds)",xscale = log10, yscale = log10, xminorticksvisible = true, xminorgridvisible = true,
     xminorticks = IntervalsBetween(5),yminorticksvisible = true, yminorgridvisible = true,
     yminorticks = IntervalsBetween(5))
     
-    plot_lines!(df.s,df.col_red,"Column reduced mm product",:circle,)
-    plot_lines!(df.s,df.std_mat,"Standard mm product",:rect)
-    plot_lines!(df.s,df.row_red,"Row reduced mm product", :xcross, :darkred)
-    #plot_lines!(df.s,df.lat_red_row,"Lattice row reduced mm product",:utriangle)
+    plot_lines!(df.m,df.col_red,"Column reduced mm product",:circle, :blue)
+    plot_lines!(df.m,df.std_mat,"Standard mm product",:rect, :orange)
+    plot_lines!(df.m,df.row_red,"Row reduced mm product", :xcross, :darkred)
+    #plot_lines!(df.m,df.lat_red_row,"Lattice row reduced mm product",:utriangle)
 
-    d_1,d_2 =  regres_theory(df.col_red, df.theo_col)
-    lines!(df.s, d_2.*df.theo_col,linestyle = :dash, label="Theoretical estimate",linewidth = 1.5, color = :black)
+    #d_1,d_2 =  regres_theory(df.col_red, df.theo_col)
+    #lines!(df.m, d_2.*df.theo_col,linestyle = :dash, label="Theoretical #estimate",linewidth = 1.5, color = :black)
     
     if case ==2
-        plot_lines!(df.s,df.col_red_sobol,"Sobol_col_red")
-        plot_lines!(df.s,df.std_mat_sobol,"Sobol_std_mul")
+        plot_lines!(df.m,df.col_red_sobol,"Sobol_col_red")
+        plot_lines!(df.m,df.std_mat_sobol,"Sobol_std_mul")
 
-        plot_lines!(df.s,df.col_red_nied,"Nied_col_red")
-        plot_lines!(df.s,df.std_mat_nied,"Nied_std_mul")
+        plot_lines!(df.m,df.col_red_nied,"Nied_col_red")
+        plot_lines!(df.m,df.std_mat_nied,"Nied_std_mul")
     end
 
     axislegend(ax, merge = true, position = :lt)
@@ -64,19 +63,19 @@ end
 
 begin
     fig = Figure()
-    ax = Axis(fig[1,1], title = "plot", xlabel = "s", ylabel = "Runtime (log seconds)" , yscale = log10, yminorticksvisible = true, yminorgridvisible = true,
+    ax = Axis(fig[1,1], title = "plot", xlabel = "m", ylabel = "Runtime (log seconds)" , yscale = log10, yminorticksvisible = true, yminorgridvisible = true,
     yminorticks = IntervalsBetween(5))
 
 
-    plot_lines!(df.s,df.col_red,"col_red",:circle)
-    plot_lines!(df.s,df.std_mat,"std_mul", :rect)
-    plot_lines!(df.s,df.row_red,"row_red", :xcross, :darkred)
-    #plot_lines!(df.s,df.lat_red_row,"row_latt_red", :utriangle)
+    plot_lines!(df.m,df.col_red,"Column reduced mm product",:circle, :blue)
+    plot_lines!(df.m,df.std_mat,"Standard mm product", :rect, :orange)
+    plot_lines!(df.m,df.row_red,"Row reduced mm product", :xcross, :darkred)
+    #plot_lines!(df.m,df.lat_red_row,"row_latt_red", :utriangle)
     
-    d_1,d_2 =  regres_theory(df.col_red, df.theo_col)
-    lines!(df.s, d_2.*df.theo_col,linestyle = :dash, label="theoretical",linewidth = 1.5, color = :black)
+    #d_1,d_2 =  regres_theory(df.col_red, df.theo_col)
+    #lines!(df.m, d_2.*df.theo_col,linestyle = :dash, label="theoretical",#linewidth = 1.5, color = :black)
     
     axislegend(ax, merge = true, position = :rb)
-    save("Output/plot_$(fn_postfix).png", fig)
+    save("Output/semilog_plot_$(fn_postfix).png", fig)
     fig
 end
