@@ -128,6 +128,15 @@ function runtime_theory(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
     return run_theory
 end 
 
+function runtime_theory_rr(τ, b, m, s, w_s = @. min(floor(Int64,log2(1:s)),m))
+    st = findlast(w_s.< m)
+    run_theory_rr = 0.0
+    for j in 1:st
+        run_theory_rr += τ*b^(m-w_s[j]) + b^m
+    end
+    return run_theory_rr
+end 
+
 function regres_comp(s_val,T_val)
     df = DataFrame(x = log.(s_val),y = log.(T_val))
     ols = lm(@formula(y ~ x), df)
